@@ -16,7 +16,7 @@ public:
     bool running = true;
     int inputBuffer[inputBufferSize];
     int inputBufferMouse[inputBufferSize];
-    int inputBufferWheel[inputBufferSize];
+    int inputBufferWheel = 0;
     sf::RenderWindow window;
     Entity player = Entity(spritesheet, specs);
     Map map = Map(spritesheet, specs);

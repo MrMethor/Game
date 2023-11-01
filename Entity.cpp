@@ -33,22 +33,30 @@ void Entity::move(int direction) {
     }
 }
 
-void Entity::update() {
-    x += velocityX * speed;
-    y += velocityY * speed;
+void Entity::updateVelocity(double gamma) {
+    x += velocityX * speed * gamma;
+    y += velocityY * speed * gamma;
 
     if (velocityX > 0) {
-        velocityX--;
+        velocityX -= gamma;
+        if (velocityX < gamma)
+            velocityX = 0;
     }
     if (velocityX < 0) {
-        velocityX++;
+        velocityX += gamma;
+        if (velocityX > -gamma)
+            velocityX = 0;
     }
 
     if (velocityY > 0) {
-        velocityY--;
+        velocityY -= gamma;
+        if (velocityY < gamma)
+            velocityY = 0;
     }
     if (velocityY < 0) {
-        velocityY++;
+        velocityY += gamma;
+        if (velocityY > -gamma)
+            velocityY = 0;
     }
 }
 

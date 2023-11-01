@@ -2,6 +2,7 @@
 
 // Constructor creates the Window and declares the Input Buffer
 Game::Game() {
+    specs.defaultFont.loadFromFile("resources/arial.ttf");
     createWindow();
     sf::Image icon;
     icon.loadFromFile("resources/icon.png");
@@ -10,8 +11,6 @@ Game::Game() {
         inputBuffer[i] = -1;
     for (int i = 0; i < inputBufferSize; i++)
         inputBufferMouse[i] = -1;
-    for (int i = 0; i < inputBufferSize; i++)
-        inputBufferWheel[i] = -1;
     map.loadMap("resources/map");
     player.setPosition(map.width / 2, map.height / 2);
 }
