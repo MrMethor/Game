@@ -3,6 +3,7 @@
 #include "SpriteSheet.h"
 #include "Map.h"
 #include "Specs.h"
+#include "Controls.h"
 
 
 #pragma once
@@ -13,7 +14,9 @@ private:
 
 public:
     Specs specs;
+    Controls controls;
     bool running = true;
+    int keyActions[256];
     int inputBuffer[inputBufferSize];
     int inputBufferMouse[inputBufferSize];
     int inputBufferWheel = 0;
@@ -22,5 +25,6 @@ public:
     Map map = Map(spritesheet, specs);
     Game();
     void createWindow();
+    void loadControls();
 };
 

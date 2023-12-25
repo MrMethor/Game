@@ -1,4 +1,5 @@
 #include "Game.h"
+#include <fstream>
 
 // Constructor creates the Window and declares the Input Buffer
 Game::Game() {
@@ -25,4 +26,14 @@ void Game::createWindow() {
     window.setActive();
     window.setKeyRepeatEnabled(false);
     window.setVerticalSyncEnabled(false);
+}
+
+void Game::loadControls() {
+	std::ifstream file("user/controls.con");
+	if (file.is_open()) {
+        
+	}
+	else {
+        file.open("default/controls.con");
+	}
 }

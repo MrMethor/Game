@@ -1,2 +1,2 @@
 #pragma once
-enum directions { Left, Right, Down, Up };
+enum Directions { Left, Right, Down, Up };

@@ -3,6 +3,8 @@
 #include "Entity.h"
 #include "Directions.h"
 #include <chrono>
+#include "Actions.h"
+#include <corecrt_math_defines.h>
 
 void update();
 void render();
@@ -23,7 +25,6 @@ int main() {
     int secondsCounter = 0;
     int upsCounter = 0;
     int fpsCounter = 0;
-    
 
     while (game.running) {
 
@@ -53,8 +54,6 @@ int main() {
         updateCounter += elapsedTime;
         secondsCounter += elapsedTime;
     }
-
-    return 0;
 }
 
 void update() {
@@ -98,45 +97,60 @@ void update() {
         }
     }
 
-    // Keyboard
+    char movingX = 0;
+    char movingY = 0;
+    // Keyboard Action reader
     for (int i = 0; i < sizeof(game.inputBuffer) / sizeof(game.inputBuffer[0]); i++) {
-        switch (game.inputBuffer[i]) {
-        case sf::Keyboard::Left:
-        case sf::Keyboard::A:
-            game.player.move(Left);
-            break;
-        case sf::Keyboard::Right:
-        case sf::Keyboard::D:
-            game.player.move(Right);
-            break;
-        case sf::Keyboard::Down:
-        case sf::Keyboard::S:
-            game.player.move(Down);
-            break;
-        case sf::Keyboard::Up:
-        case sf::Keyboard::W:
-            game.player.move(Up);
-            break;
-        case sf::Keyboard::F11:
-            game.specs.fullscreen = !game.specs.fullscreen;
-            game.createWindow();
-            for (int i = 0; i < sizeof(game.inputBuffer) / sizeof(game.inputBuffer[0]); i++) {
-                game.inputBuffer[i] = -1;
+        if (game.inputBuffer[i] != -1) {
+            switch (game.controls.keymap[game.inputBuffer[i]]) {
+            case moveLeft:
+                movingX--;
+                break;
+            case moveRight:
+                movingX++;
+                break;
+            case moveDown:
+                movingY++;
+                break;
+            case moveUp:
+                movingY--;
+                break;
+            case fullscreen:
+                game.specs.fullscreen = !game.specs.fullscreen;
+                game.createWindow();
+                for (int i = 0; i < sizeof(game.inputBuffer) / sizeof(game.inputBuffer[0]); i++) {
+                    game.inputBuffer[i] = -1;
+                }
+                break;
+            case openMenu:
+                game.window.close();
+                game.running = false;
             }
-            break;
-        case sf::Keyboard::Escape:
-            game.window.close();
-            game.running = false;
         }
     }
+    if (movingX == 0 && movingY == 0)
+        game.player.degree = -1;
+    else {
+        game.player.degree = atan2(movingX, movingY) * (180.0 / M_PI);
+        game.player.degree = game.player.degree < 0 ? game.player.degree + 360 : game.player.degree;
+    }
 
-    // Mouse
+    // Mouse Action reader
     for (int i = 0; i < sizeof(game.inputBufferMouse) / sizeof(game.inputBufferMouse[0]); i++) {
         switch (game.inputBufferMouse[i]) {
+        case sf::Mouse::Left:
+            //M1
+            break;
+        case sf::Mouse::Right:
+            //M2
+            break;
+        case sf::Mouse::Middle:
+            //M3
+            break;
         }
     }
 
-    // Mouse Wheel
+    // Mouse Action reader
     while (game.inputBufferWheel > 0) {
         zoom(true);
         game.inputBufferWheel--;
@@ -145,11 +159,12 @@ void update() {
         zoom(false);
         game.inputBufferWheel++;
     }
+
+    game.player.updateVelocity();
+
 }
 
 void render() {
-
-    game.player.updateVelocity(gamma);
 
     game.window.clear();
 
