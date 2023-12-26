@@ -9,8 +9,8 @@ public:
     sf::Sprite sprite;
     double x = 0;
     double y = 0;
-    double speed = 5;
-    double friction = 1;
+    double speed = 3;
+    double friction = 0.1;
     double velocityX = 0;
     double velocityY = 0;
     int degree = -1;

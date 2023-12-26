@@ -2,7 +2,7 @@
 #include "Entity.h"
 #include <corecrt_math_defines.h>
 
-Entity::Entity(SpriteSheet &spriteSheet, Specs &specs) {
+Entity::Entity(SpriteSheet& spriteSheet, Specs& specs) {
     this->specs = specs;
     int sheetX = 1 * spriteSheet.tileSize;
     int sheetY = 1 * spriteSheet.tileSize;
@@ -20,15 +20,26 @@ void Entity::updateVelocity() {
         double axis = degree * (M_PI / 180.0);
         maxVelX = std::ceil(sin(axis) * 100.0) / 100.0;
         maxVelY = std::ceil(cos(axis) * 100.0) / 100.0;
-
-        velocityX += (velocityX < abs(maxVelX) && velocityX > -abs(maxVelX)) ? friction * maxVelX : 0;
-        velocityY += (velocityY < abs(maxVelY) && velocityY > -abs(maxVelY)) ? friction * maxVelY : 0;
+        
+        if (velocityX < abs(maxVelX) && velocityX > -abs(maxVelX)) {
+            if (velocityX <= abs(maxVelX) && velocityX + friction * maxVelX > abs(maxVelX))
+				velocityX = maxVelX;
+            else if (velocityX >= -abs(maxVelX) && velocityX + friction * maxVelX < -abs(maxVelX))
+                velocityX = maxVelX;
+            else
+				velocityX += friction * maxVelX;
+        }
+        if (velocityY < abs(maxVelY) && velocityY > -abs(maxVelY)) {
+            if (velocityY <= abs(maxVelY) && velocityY + friction * maxVelY > abs(maxVelY))
+                velocityY = maxVelY;
+            else if (velocityY >= -abs(maxVelY) && velocityY + friction * maxVelY < -abs(maxVelY))
+                velocityY = maxVelY;
+            else
+                velocityY += friction * maxVelY;
+        }
     }
-    
-    std::cout << "degree: " << degree << " maxVelX: " << maxVelX << " maxVelY: " << maxVelY << " velocityX: " << velocityX << " velocityY: " << velocityY << std::endl;
 
     if (velocityX > abs(maxVelX) || (velocityX > 0 && maxVelX < 0)) {
-        std::cout << (velocityX > abs(maxVelX)) << std::endl;
         velocityX -= friction;
         if (velocityX < 0)
             velocityX = 0;
@@ -39,18 +50,16 @@ void Entity::updateVelocity() {
             velocityX = 0;
     }
 
-    if (velocityY > abs(maxVelY) || (velocityY > 0 && maxVelY < 0.69)) {
+    if (velocityY > abs(maxVelY) || (velocityY > 0 && maxVelY < 0)) {
         velocityY -= friction;
         if (velocityY < 0)
             velocityY = 0;
     }
-    if (velocityY < -abs(maxVelY) || (velocityY < 0 && maxVelY > -0.69)) {
+    if (velocityY < -abs(maxVelY) || (velocityY < 0 && maxVelY > 0)) {
         velocityY += friction;
         if (velocityY > 0)
             velocityY = 0;
     }
-
-    //std::cout << "degree: " << degree << " maxVelX: " << maxVelX << " maxVelY: " << maxVelY << " velocityX: " << velocityX << " velocityY: " << velocityY << std::endl;
 
     x += velocityX * speed / 60;
     y += velocityY * speed / 60;
