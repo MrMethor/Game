@@ -5,7 +5,6 @@
 #include "Specs.h"
 #include "Controls.h"
 
-
 #pragma once
 class Game {
 private:

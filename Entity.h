@@ -7,6 +7,8 @@
 class Entity {
 public:
     sf::Sprite sprite;
+    double previousX = 0;
+    double previousY = 0;
     double x = 0;
     double y = 0;
     double speed = 3;

@@ -1,4 +1,5 @@
 #pragma once
+// Contains all the specs for the game
 class Specs {
 public:
 	sf::Font defaultFont;

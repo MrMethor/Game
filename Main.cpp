@@ -13,12 +13,14 @@ void zoom(bool in);
 Game game;
 int fps = 0;
 int ups = 0;
-double gamma = 0;
+double interpolation = 0;
+double interpolationSum = 0;
 
 int main() {
 
     sf::Clock clock;
     int second = 1000000000;
+    // The amount the game should update per second
     char desiredUPS = 60;
     int delta = second / desiredUPS;
     int updateCounter = 0;
@@ -26,6 +28,7 @@ int main() {
     int upsCounter = 0;
     int fpsCounter = 0;
 
+    // Main game loop that runs until the window is closed, it calls the update and render functions and calculates FPS and UPS
     while (game.running) {
 
         auto start = std::chrono::high_resolution_clock::now();
@@ -50,13 +53,16 @@ int main() {
         auto finish = std::chrono::high_resolution_clock::now();
 
         long elapsedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count();
-        gamma = (double)elapsedTime / delta;
+        interpolation = (double)elapsedTime / delta;
         updateCounter += elapsedTime;
         secondsCounter += elapsedTime;
     }
 }
 
+// Update function that reads input and updates the game
 void update() {
+
+    // Adds keys to the input buffer
     sf::Event event;
     while (game.window.pollEvent(event)) {
         switch (event.type) {
@@ -97,9 +103,9 @@ void update() {
         }
     }
 
+    // Compares the input buffer to the keymap and applies the actions based on the keymap
     char movingX = 0;
     char movingY = 0;
-    // Keyboard Action reader
     for (int i = 0; i < sizeof(game.inputBuffer) / sizeof(game.inputBuffer[0]); i++) {
         if (game.inputBuffer[i] != -1) {
             switch (game.controls.keymap[game.inputBuffer[i]]) {
@@ -118,9 +124,8 @@ void update() {
             case fullscreen:
                 game.specs.fullscreen = !game.specs.fullscreen;
                 game.createWindow();
-                for (int i = 0; i < sizeof(game.inputBuffer) / sizeof(game.inputBuffer[0]); i++) {
+                for (int i = 0; i < sizeof(game.inputBuffer) / sizeof(game.inputBuffer[0]); i++)
                     game.inputBuffer[i] = -1;
-                }
                 break;
             case openMenu:
                 game.window.close();
@@ -135,7 +140,7 @@ void update() {
         game.player.degree = game.player.degree < 0 ? game.player.degree + 360 : game.player.degree;
     }
 
-    // Mouse Action reader
+    // MOUSE WORK IN PROGRESS
     for (int i = 0; i < sizeof(game.inputBufferMouse) / sizeof(game.inputBufferMouse[0]); i++) {
         switch (game.inputBufferMouse[i]) {
         case sf::Mouse::Left:
@@ -150,7 +155,7 @@ void update() {
         }
     }
 
-    // Mouse Action reader
+    // Mouse wheel input
     while (game.inputBufferWheel > 0) {
         zoom(true);
         game.inputBufferWheel--;
@@ -161,25 +166,32 @@ void update() {
     }
 
     game.player.updateVelocity();
-
 }
 
 void render() {
 
     game.window.clear();
+    // Calculates the interpolation between frames
+    if (interpolationSum >= 1)
+        interpolationSum -= 1;
+    interpolationSum += interpolation;
+        
+    double interpolationX = game.player.previousX + (game.player.x - game.player.previousX) * interpolationSum;
+    double interpolationY = game.player.previousY + (game.player.y - game.player.previousY) * interpolationSum;
 
+    // Calculates the camera offset based on the player's position
     double cameraOffsetX = 0;
     double cameraOffsetY = 0;
-    double left = -((0 * game.specs.lunit * game.specs.scale - (game.player.x * game.specs.lunit * game.specs.scale) + game.window.getSize().x / 2) - (game.specs.lunit / 2 * game.specs.scale));
-    double right = (game.map.width * game.specs.lunit * game.specs.scale - (game.player.x * game.specs.lunit * game.specs.scale) + game.window.getSize().x / 2) - (game.specs.lunit / 2 * game.specs.scale) - game.window.getSize().x;
-    double up = -((0 * game.specs.lunit * game.specs.scale - (game.player.y * game.specs.lunit * game.specs.scale) + game.window.getSize().y / 2) - (game.specs.lunit / 2 * game.specs.scale));
-    double down = (game.map.height * game.specs.lunit * game.specs.scale - (game.player.y * game.specs.lunit * game.specs.scale) + game.window.getSize().y / 2) - (game.specs.lunit / 2 * game.specs.scale) - game.window.getSize().y;
+    double left = -((0 * game.specs.lunit * game.specs.scale - (interpolationX * game.specs.lunit * game.specs.scale) + game.window.getSize().x / 2) - (game.specs.lunit / 2 * game.specs.scale));
+    double right = (game.map.width * game.specs.lunit * game.specs.scale - (interpolationX * game.specs.lunit * game.specs.scale) + game.window.getSize().x / 2) - (game.specs.lunit / 2 * game.specs.scale) - game.window.getSize().x;
+    double up = -((0 * game.specs.lunit * game.specs.scale - (interpolationY * game.specs.lunit * game.specs.scale) + game.window.getSize().y / 2) - (game.specs.lunit / 2 * game.specs.scale));
+    double down = (game.map.height * game.specs.lunit * game.specs.scale - (interpolationY * game.specs.lunit * game.specs.scale) + game.window.getSize().y / 2) - (game.specs.lunit / 2 * game.specs.scale) - game.window.getSize().y;
 
     if (left < 0)
         cameraOffsetX += left;
     if (right < 0)
         cameraOffsetX -= right;
-    if (right + left < 0)
+    if (right + left < 0)  
         cameraOffsetX = cameraOffsetX / 2;
 
     if (up < 0)
@@ -189,24 +201,28 @@ void render() {
     if (up + down < 0)
         cameraOffsetY = cameraOffsetY / 2;
 
+    // Indicates how many tiles should be rendered around the player
     int renderDistance = 13;
 
+    // Renders the map tiles
     if (game.map.defined) {
         for (int y = 0; y < game.map.height; y++) {
             for (int x = 0; x < game.map.width; x++) {
-                if(x < game.player.x + 16){}
-                game.map.tiles[x + y * game.map.width].sprite.setPosition((double)x * game.specs.lunit * game.specs.scale - (game.player.x * game.specs.lunit * game.specs.scale) + game.window.getSize().x / 2 + cameraOffsetX,
-                                                                         (double)y * game.specs.lunit * game.specs.scale  - (game.player.y * game.specs.lunit * game.specs.scale) + game.window.getSize().y / 2 + cameraOffsetY);
-                if (x < game.player.x + renderDistance - cameraOffsetX / game.specs.lunit / game.specs.scale && x > game.player.x - renderDistance - cameraOffsetX / game.specs.lunit / game.specs.scale
-                 && y < game.player.y + renderDistance / 1.7 - cameraOffsetY / game.specs.lunit / game.specs.scale && y > game.player.y - renderDistance / 1.7 - cameraOffsetY / game.specs.lunit / game.specs.scale)
+                if(x < interpolationX + 16){}
+                game.map.tiles[x + y * game.map.width].sprite.setPosition((double)x * game.specs.lunit * game.specs.scale - (interpolationX * game.specs.lunit * game.specs.scale) + game.window.getSize().x / 2 + cameraOffsetX,
+                                                                         (double)y * game.specs.lunit * game.specs.scale  - (interpolationY * game.specs.lunit * game.specs.scale) + game.window.getSize().y / 2 + cameraOffsetY);
+                if (x < interpolationX + renderDistance - cameraOffsetX / game.specs.lunit / game.specs.scale && x > interpolationX - renderDistance - cameraOffsetX / game.specs.lunit / game.specs.scale
+                 && y < interpolationY + renderDistance / 1.7 - cameraOffsetY / game.specs.lunit / game.specs.scale && y > interpolationY - renderDistance / 1.7 - cameraOffsetY / game.specs.lunit / game.specs.scale)
                     game.window.draw(game.map.tiles[x + y * game.map.width].sprite);
             }
         }
     }
 
+    // Renders the player
     game.player.sprite.setPosition(game.window.getSize().x / 2 + cameraOffsetX, game.window.getSize().y / 2 + cameraOffsetY);
     game.window.draw(game.player.sprite);
 
+    // Miscellaneous
     sf::Text textFPS;
     textFPS.setFont(game.specs.defaultFont);
     textFPS.setCharacterSize(12);
@@ -214,10 +230,11 @@ void render() {
     textFPS.setString(std::to_string(fps) + " fps");
     game.window.draw(textFPS);
 
+    // Displays the window
     game.window.display();
-
 }
 
+// Zooms the camera in or out
 void zoom(bool in) {
     double zoomSpeed = 0.2;
     int maxScale = 10;

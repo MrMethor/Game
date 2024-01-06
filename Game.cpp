@@ -12,28 +12,24 @@ Game::Game() {
         inputBuffer[i] = -1;
     for (int i = 0; i < inputBufferSize; i++)
         inputBufferMouse[i] = -1;
-    map.loadMap("resources/map");
+    map.loadMap("resources/overworld.map");
     player.setPosition(map.width / 2, map.height / 2);
 }
 
+// Creates and sets up the window
 void Game::createWindow() {
-    if (specs.fullscreen) {
+    if (specs.fullscreen)
         window.create(sf::VideoMode(), "", sf::Style::Fullscreen);
-    }
-    else {
+    else
         window.create(sf::VideoMode(specs.width, specs.height), "", sf::Style::Titlebar | sf::Style::Close);
-    }
     window.setActive();
     window.setKeyRepeatEnabled(false);
     window.setVerticalSyncEnabled(false);
 }
 
+// Loads the controls from the file
 void Game::loadControls() {
 	std::ifstream file("user/controls.con");
-	if (file.is_open()) {
-        
-	}
-	else {
+	if (!file.is_open())
         file.open("default/controls.con");
-	}
 }

@@ -27,9 +27,8 @@ bool Map::loadMap(std::string path) {
 		}
 
 		Tile* pTiles = new Tile[width * height];
-		for (int i = 0; i < width * height; i++) {
+		for (int i = 0; i < width * height; i++)
 			pTiles[i].loadTile(pContent[i], *pSpritesheet, specs);
-		}
 
 		delete[] pContent;
 
