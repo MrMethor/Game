@@ -1,5 +1,6 @@
 #include "Entity.h"
 #include <corecrt_math_defines.h>
+#include <iostream>
 
 Entity::Entity(SpriteSheet& spriteSheet, Specs& specs) {
     this->specs = specs;
@@ -14,6 +15,7 @@ Entity::Entity(SpriteSheet& spriteSheet, Specs& specs) {
 
 // Updates the sprite's velocity and position
 void Entity::updateVelocity() {
+
     previousX = x;
     previousY = y;
 
@@ -25,8 +27,8 @@ void Entity::updateVelocity() {
     // Based on the way player is moving, adds velocity in that direction
     if (degree > -1) {
         double axis = degree * (M_PI / 180.0);
-        maxVelX = std::ceil(sin(axis) * 100.0) / 100.0;
-        maxVelY = std::ceil(cos(axis) * 100.0) / 100.0;
+        maxVelX = sin(axis);
+        maxVelY = cos(axis);
         maxVelAbsX = abs(maxVelX);
         maxVelAbsY = abs(maxVelY);
         

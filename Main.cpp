@@ -20,9 +20,7 @@ int main() {
 
     sf::Clock clock;
     int second = 1000000000;
-    // The amount the game should update per second
-    char desiredUPS = 60;
-    int delta = second / desiredUPS;
+    int delta = second / game.specs.desiredUPS;
     int updateCounter = 0;
     int secondsCounter = 0;
     int upsCounter = 0;
@@ -53,9 +51,13 @@ int main() {
         auto finish = std::chrono::high_resolution_clock::now();
 
         long elapsedTime = std::chrono::duration_cast<std::chrono::nanoseconds>(finish - start).count();
-        interpolation = (double)elapsedTime / delta;
         updateCounter += elapsedTime;
         secondsCounter += elapsedTime;
+
+        interpolation = (double)elapsedTime / delta;
+        interpolationSum += interpolation;
+        if (interpolationSum >= 1)
+            interpolationSum -= 1;
     }
 }
 
@@ -171,56 +173,14 @@ void update() {
 void render() {
 
     game.window.clear();
-    // Calculates the interpolation between frames
-    if (interpolationSum >= 1)
-        interpolationSum -= 1;
-    interpolationSum += interpolation;
-        
-    double interpolationX = game.player.previousX + (game.player.x - game.player.previousX) * interpolationSum;
-    double interpolationY = game.player.previousY + (game.player.y - game.player.previousY) * interpolationSum;
 
-    // Calculates the camera offset based on the player's position
-    double cameraOffsetX = 0;
-    double cameraOffsetY = 0;
-    double left = -((0 * game.specs.lunit * game.specs.scale - (interpolationX * game.specs.lunit * game.specs.scale) + game.window.getSize().x / 2) - (game.specs.lunit / 2 * game.specs.scale));
-    double right = (game.map.width * game.specs.lunit * game.specs.scale - (interpolationX * game.specs.lunit * game.specs.scale) + game.window.getSize().x / 2) - (game.specs.lunit / 2 * game.specs.scale) - game.window.getSize().x;
-    double up = -((0 * game.specs.lunit * game.specs.scale - (interpolationY * game.specs.lunit * game.specs.scale) + game.window.getSize().y / 2) - (game.specs.lunit / 2 * game.specs.scale));
-    double down = (game.map.height * game.specs.lunit * game.specs.scale - (interpolationY * game.specs.lunit * game.specs.scale) + game.window.getSize().y / 2) - (game.specs.lunit / 2 * game.specs.scale) - game.window.getSize().y;
+    // Calculates the interpolation between frames        
+    game.player.interpolationX = game.player.previousX + (game.player.x - game.player.previousX) * interpolationSum;
+    game.player.interpolationY = game.player.previousY + (game.player.y - game.player.previousY) * interpolationSum;
 
-    if (left < 0)
-        cameraOffsetX += left;
-    if (right < 0)
-        cameraOffsetX -= right;
-    if (right + left < 0)  
-        cameraOffsetX = cameraOffsetX / 2;
-
-    if (up < 0)
-        cameraOffsetY += up;
-    if (down < 0)
-        cameraOffsetY -= down;
-    if (up + down < 0)
-        cameraOffsetY = cameraOffsetY / 2;
-
-    // Indicates how many tiles should be rendered around the player
-    int renderDistance = 13;
-
-    // Renders the map tiles
-    if (game.map.defined) {
-        for (int y = 0; y < game.map.height; y++) {
-            for (int x = 0; x < game.map.width; x++) {
-                if(x < interpolationX + 16){}
-                game.map.tiles[x + y * game.map.width].sprite.setPosition((double)x * game.specs.lunit * game.specs.scale - (interpolationX * game.specs.lunit * game.specs.scale) + game.window.getSize().x / 2 + cameraOffsetX,
-                                                                         (double)y * game.specs.lunit * game.specs.scale  - (interpolationY * game.specs.lunit * game.specs.scale) + game.window.getSize().y / 2 + cameraOffsetY);
-                if (x < interpolationX + renderDistance - cameraOffsetX / game.specs.lunit / game.specs.scale && x > interpolationX - renderDistance - cameraOffsetX / game.specs.lunit / game.specs.scale
-                 && y < interpolationY + renderDistance / 1.7 - cameraOffsetY / game.specs.lunit / game.specs.scale && y > interpolationY - renderDistance / 1.7 - cameraOffsetY / game.specs.lunit / game.specs.scale)
-                    game.window.draw(game.map.tiles[x + y * game.map.width].sprite);
-            }
-        }
-    }
-
-    // Renders the player
-    game.player.sprite.setPosition(game.window.getSize().x / 2 + cameraOffsetX, game.window.getSize().y / 2 + cameraOffsetY);
-    game.window.draw(game.player.sprite);
+    game.cameraOffset();
+    game.renderMap();
+    game.renderPlayer();
 
     // Miscellaneous
     sf::Text textFPS;
@@ -236,7 +196,8 @@ void render() {
 
 // Zooms the camera in or out
 void zoom(bool in) {
-    double zoomSpeed = 0.2;
+
+    double zoomSpeed = 0.1;
     int maxScale = 10;
     int minScale = 5;
     if (in && game.specs.scale < maxScale)

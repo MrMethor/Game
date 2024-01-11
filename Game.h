@@ -19,11 +19,16 @@ public:
     int inputBuffer[inputBufferSize];
     int inputBufferMouse[inputBufferSize];
     int inputBufferWheel = 0;
+    double cameraOffsetX = 0;
+    double cameraOffsetY = 0;
     sf::RenderWindow window;
     Entity player = Entity(spritesheet, specs);
     Map map = Map(spritesheet, specs);
     Game();
     void createWindow();
     void loadControls();
+    void renderMap();
+    void renderPlayer();
+    void cameraOffset();
 };
 

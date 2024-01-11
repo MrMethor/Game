@@ -8,4 +8,6 @@ public:
 	int width = 1000;
 	int height = 650;
 	int lunit = 16;
+	char desiredUPS = 60;
+	int renderDistance = 13;
 };
