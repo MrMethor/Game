@@ -3,9 +3,8 @@
 
 void fileError(char* content);
 
-Map::Map(SpriteSheet &spriteSheet, Specs &specs) {
-	this->pSpritesheet = &spriteSheet;
-	this->specs = specs;
+Map::Map(SpriteSheet &spriteSheet) {
+	this->spriteSheet = &spriteSheet;
 }
 
 // Loads map from a file
@@ -28,7 +27,7 @@ bool Map::loadMap(std::string path) {
 
 		Tile* pTiles = new Tile[width * height];
 		for (int i = 0; i < width * height; i++)
-			pTiles[i].loadTile(pContent[i], *pSpritesheet, specs);
+			pTiles[i].loadTile(pContent[i], *spriteSheet);
 
 		delete[] pContent;
 
@@ -49,4 +48,14 @@ bool Map::loadMap(std::string path) {
 void fileError(char* content) {
 	delete content;
 	std::cout << "The file is not compatible";
+}
+
+bool Map::isDefined() const {
+	return defined;
+}
+int Map::getWidth() const {
+	return width;
+}
+int Map::getHeight() const {
+	return height;
 }

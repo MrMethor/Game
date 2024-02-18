@@ -7,28 +7,41 @@
 
 #pragma once
 class Game {
-private:
-    const static int inputBufferSize = 8;
-    SpriteSheet spritesheet = SpriteSheet("resources/spritesheet.png", 16, 16);
 
 public:
+    sf::RenderWindow window;
+    bool running = true;
+
+    Game();
+    void update();
+    void render(double interpolationModifier, int fps);
+
+    double getDesiredUPS() const;
+
+private:
     Specs specs;
     Controls controls;
-    bool running = true;
-    int keyActions[256];
-    int inputBuffer[inputBufferSize];
-    int inputBufferMouse[inputBufferSize];
+    SpriteSheet spritesheet = SpriteSheet("resources/spritesheet.png");
+    Entity player = Entity(spritesheet);
+    Map map = Map(spritesheet);
+    const static int INPUT_BUFFER_SIZE = 8;
+    int inputBuffer[INPUT_BUFFER_SIZE];
+    int inputBufferMouse[INPUT_BUFFER_SIZE];
     int inputBufferWheel = 0;
+    int keyActions[256];
     double cameraOffsetX = 0;
     double cameraOffsetY = 0;
-    sf::RenderWindow window;
-    Entity player = Entity(spritesheet, specs);
-    Map map = Map(spritesheet, specs);
-    Game();
+    //sf::RenderTexture lightMap;
+
     void createWindow();
-    void loadControls();
-    void renderMap();
+
+    void zoom(bool in);
+    void updateSprites();
+    
+    void cameraOffset(double interpolationX, double interpolationY);
+    void renderMap(double interpolationX, double interpolationY);
     void renderPlayer();
-    void cameraOffset();
+    //void renderLightmap();
+    
 };
 

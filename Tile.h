@@ -1,14 +1,12 @@
 #include "SFML/Graphics.hpp"
 #include "SpriteSheet.h"
-#include "Specs.h"
 
 #pragma once
 class Tile {
-	
 public:
 	sf::Sprite sprite;
-	int id = 0;
-	void loadTile(char id, SpriteSheet &spriteSheet, Specs &specs);
+	void loadTile(char id, SpriteSheet& spriteSheet);
+
 private:
-	Specs specs;
+	int id = 0;
 };

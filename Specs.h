@@ -5,9 +5,11 @@ public:
 	sf::Font defaultFont;
 	bool fullscreen = false;
 	double scale = 6;
+	double spriteScale = 0;
 	int width = 1000;
 	int height = 650;
-	int lunit = 16;
+	int fullscreenWidth = 1920;
+	int fullscreenHeight = 1080;
 	char desiredUPS = 60;
 	int renderDistance = 13;
 };

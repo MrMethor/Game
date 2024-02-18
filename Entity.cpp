@@ -1,20 +1,17 @@
 #include "Entity.h"
 #include <corecrt_math_defines.h>
-#include <iostream>
 
-Entity::Entity(SpriteSheet& spriteSheet, Specs& specs) {
-    this->specs = specs;
-    int sheetX = 1 * spriteSheet.tileSize;
-    int sheetY = 1 * spriteSheet.tileSize;
+Entity::Entity(SpriteSheet& spriteSheet) {
+    int pixelX = 1 * spriteSheet.getTileSize();
+    int pixelY = 1 * spriteSheet.getTileSize();
     sprite.setTexture(spriteSheet.texture);
-    sprite.setTextureRect(sf::IntRect(sheetX, sheetY, sheetX + specs.lunit, sheetY + specs.lunit));
+    sprite.setTextureRect(sf::IntRect(pixelX, pixelY, pixelX + spriteSheet.getTileSize(), pixelY + spriteSheet.getTileSize()));
     sprite.setPosition(x, y);
-    sprite.setOrigin(specs.lunit / 2, specs.lunit / 2);
-    sprite.setScale(specs.scale, specs.scale);
+    sprite.setOrigin(spriteSheet.getTileSize() / 2, spriteSheet.getTileSize() / 2);
 }
 
 // Updates the sprite's velocity and position
-void Entity::updateVelocity() {
+void Entity::updateVelocity(char movingX, char movingY) {
 
     previousX = x;
     previousY = y;
@@ -23,6 +20,13 @@ void Entity::updateVelocity() {
     double maxVelY = 0;
     double maxVelAbsX = 0;
     double maxVelAbsY = 0;
+
+    if (movingX == 0 && movingY == 0)
+        degree = -1;
+    else {
+        degree = atan2(movingX, movingY) * (180.0 / M_PI);
+        degree = degree < 0 ? degree + 360 : degree;
+    }
 
     // Based on the way player is moving, adds velocity in that direction
     if (degree > -1) {
@@ -82,4 +86,18 @@ void Entity::updateVelocity() {
 void Entity::setPosition(double x, double y){
     this-> x = x;
     this-> y = y;
+}
+
+// Getters
+double Entity::getX() const {
+    return x;
+}
+double Entity::getY() const {
+    return y;
+}
+double Entity::getPreviousX() const {
+    return previousX;
+}
+double Entity::getPreviousY() const {
+    return previousY;
 }
