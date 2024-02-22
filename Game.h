@@ -22,6 +22,7 @@ private:
     Specs specs;
     Controls controls;
     SpriteSheet spritesheet = SpriteSheet("resources/spritesheet.png");
+    sf::View view;
     Entity player = Entity(spritesheet);
     Map map = Map(spritesheet);
     const static int INPUT_BUFFER_SIZE = 8;
@@ -31,17 +32,8 @@ private:
     int keyActions[256];
     double cameraOffsetX = 0;
     double cameraOffsetY = 0;
-    //sf::RenderTexture lightMap;
 
     void createWindow();
-
-    void zoom(bool in);
-    void updateSprites();
-    
-    void cameraOffset(double interpolationX, double interpolationY);
-    void renderMap(double interpolationX, double interpolationY);
-    void renderPlayer();
-    //void renderLightmap();
-    
+    void zoom(double speed);
 };
 
