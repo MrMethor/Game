@@ -10,13 +10,13 @@ Game::Game() {
         inputBuffer[i] = -1;
     for (int i = 0; i < INPUT_BUFFER_SIZE; i++)
         inputBufferMouse[i] = -1;
-    map.loadMap("resources/overworld.map");
+    map.loadMap("res/overworld.map");
     player.setPosition(map.getWidth() / 2, map.getHeight() / 2);
 }
 
 // Creates and sets up the window
 void Game::createWindow() {
-    specs.defaultFont.loadFromFile("resources/arial.ttf");
+    specs.defaultFont.loadFromFile("res/arial.ttf");
     if (specs.fullscreen) {
         window.create(sf::VideoMode(specs.fullscreenWidth, specs.fullscreenHeight, 32), "", sf::Style::Fullscreen);
         view.setSize(sf::Vector2f(specs.fullscreenWidth, specs.fullscreenHeight));
@@ -31,7 +31,7 @@ void Game::createWindow() {
     window.setKeyRepeatEnabled(false);
     window.setVerticalSyncEnabled(false);
     sf::Image icon;
-    icon.loadFromFile("resources/icon.png");
+    icon.loadFromFile("res/icon.png");
     window.setIcon(icon.getSize().x, icon.getSize().y, icon.getPixelsPtr());
     view.zoom(6);
 }

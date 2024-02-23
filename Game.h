@@ -21,7 +21,7 @@ public:
 private:
     Specs specs;
     Controls controls;
-    SpriteSheet spritesheet = SpriteSheet("resources/spritesheet.png");
+    SpriteSheet spritesheet = SpriteSheet("res/spritesheet.png");
     sf::View view;
     Entity player = Entity(spritesheet);
     Map map = Map(spritesheet);
